@@ -12,18 +12,13 @@ import kotlin.concurrent.thread
 
 
 class KotlinChatSocket(
-        address: String,
-        port: Int,
+        private val socket: Socket,
         messageProcessingQueue: Queue<Message>
 ) {
-    private val socket: Socket = Socket(address, port)
-    private val outputStream: BufferedWriter
-    private val inputStream: BufferedReader
+    private val outputStream: BufferedWriter = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
+    private val inputStream: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
 
     init {
-        outputStream = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
-        inputStream = BufferedReader(InputStreamReader(socket.getInputStream()))
-
         thread {
             while(true)
             {

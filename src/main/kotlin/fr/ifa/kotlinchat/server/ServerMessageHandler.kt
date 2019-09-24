@@ -16,8 +16,27 @@ class ServerMessageHandler(
     override fun run() {
         try {
             while (true) {
-                println("Debug: Launch Server Message Handler")
-                // Dépiler queue
+                if (queue.isNotEmpty()) {
+                    // Dépiler queue
+                    val message = queue.poll()
+
+                    println("Debug: ServerMessageHandle : ID = ${message.identifier} | C = ${message.content}")
+
+                    when (message.identifier) {
+                        MessageIdentifier.LOGIN -> {
+                            sendMessage("SEND|Bienvenue ${message.content} !\n")
+                        }
+                        MessageIdentifier.SEND -> {
+                            
+                        }
+                        MessageIdentifier.LOGOUT -> {
+
+                        }
+                        else -> {
+
+                        }
+                    }
+                }
 /*
                 try {
                     if (line == null)
@@ -54,6 +73,8 @@ class ServerMessageHandler(
     }
 
     fun sendMessage(message: String) {
-        // send to All
+        for (socket in clientSockets) {
+            socket.sendMessage(message)
+        }
     }
 }
