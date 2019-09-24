@@ -1,13 +1,20 @@
-package fr.ifa.kotlinchat.client.app
+package fr.ifa.kotlinchat.common.socket
 
-import java.io.*
+import fr.ifa.kotlinchat.common.message.Message
+import fr.ifa.kotlinchat.common.message.MessageFactory
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.net.Socket
+import java.util.*
 import kotlin.concurrent.thread
 
 
-class KotlinClientSocket(
+class KotlinChatSocket(
         address: String,
-        port: Int
+        port: Int,
+        messageProcessingQueue: Queue<Message>
 ) {
     private val socket: Socket = Socket(address, port)
     private val outputStream: BufferedWriter
@@ -20,16 +27,16 @@ class KotlinClientSocket(
         thread {
             while(true)
             {
-                println("read")
                 val line = inputStream.readLine()
-                println(line)
+                println("Debug: Message Received - $line")
+                messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
             }
         }
     }
 
     fun sendMessage(message: String)
     {
-        println("test : $message")
+        println("Debug: Send Message - $message")
         outputStream.write(message)
         outputStream.flush()
     }

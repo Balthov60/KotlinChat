@@ -1,21 +1,15 @@
 package fr.ifa.kotlinchat.client.view
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import fr.balthazarfrolin.kotlin.tools.views.GlobalStyles
-import fr.ifa.kotlinchat.client.app.KotlinClientSocket
+import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import fr.ifa.kotlinchat.client.app.Styles
 import fr.ifa.kotlinchat.common.message.MessageFactory
 import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import tornadofx.*
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
-import java.net.Socket
 
-class MainView : View("Hello TornadoFX") {
+class LoginView : View("Chat Login") {
 
     private val controller = MainViewController()
 
@@ -47,7 +41,7 @@ class MainView : View("Hello TornadoFX") {
 
 class MainViewController : Controller()
 {
-    private val clientSocket = KotlinClientSocket("127.0.0.1", 4242)
+    private val clientSocket = KotlinChatSocket("127.0.0.1", 4242)
 
     val userName = SimpleStringProperty("")
     val messageValues = SimpleStringProperty("")
