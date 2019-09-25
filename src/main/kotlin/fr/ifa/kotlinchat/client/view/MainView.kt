@@ -60,7 +60,7 @@ class MainView : View("Kotlin Chat") {
         listview(controller.history) {
             cellFormat { value ->
                 graphic = vbox {
-                    label("Message de : ${value.getUsername()}").addClass(GlobalStyles.bottomBorder)
+                    label("Message de : ${value.getUsername()} le ${value.time}").addClass(GlobalStyles.bottomBorder)
                     label(value.getUserMessageContent())
                 }
             }

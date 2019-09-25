@@ -9,9 +9,17 @@ object MessageFactory {
         return Message(MessageIdentifier.SEND, arrayListOf(username, content))
     }
 
-    fun createMessageFromString(message: String): Message { val args: List<String> = message.split("|")
-        val content: List<String> = args.subList(1, args.size)
+    fun createMessageFromString(message: String): Message {
+        val args: List<String> = message.split("|")
+        val content: List<String> = args.subList(2, args.size)
         return Message(MessageIdentifier.valueOf(args[0]), content)
+    }
+
+    fun createMessageFromHistory(message: String): Message {
+        val args: List<String> = message.split("|")
+        val time: String = args[1]
+        val content: List<String> = args.subList(2, args.size)
+        return Message(MessageIdentifier.valueOf(args[0]), content, time)
     }
 
     fun createLoginMessage(username: String): Message {
