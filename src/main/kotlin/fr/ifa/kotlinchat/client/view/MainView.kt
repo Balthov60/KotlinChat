@@ -13,6 +13,7 @@ import javafx.collections.ObservableList
 import javafx.geometry.HPos
 import javafx.geometry.VPos
 import tornadofx.*
+import java.lang.Exception
 import java.net.Socket
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.concurrent.fixedRateTimer
@@ -89,7 +90,7 @@ class MainViewController(mainView: MainView) : Controller()
     class UpdateHistoryRequest(val message: Message) : FXEvent()
 
     private val receivedMessageQueue = ArrayBlockingQueue<Pair<Socket, Message>>(10)
-    private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
+    private lateinit var clientSocket: KotlinChatSocket
 
     val history: ObservableList<Message> = FXCollections.observableArrayList()
     val userName = SimpleStringProperty("")
@@ -120,6 +121,9 @@ class MainViewController(mainView: MainView) : Controller()
             return
         }
 
+        clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
+        isLogged = true
+
         val message = MessageFactory.createLoginMessage(userName.value)
         clientSocket.sendMessage(message)
     }
@@ -127,6 +131,8 @@ class MainViewController(mainView: MainView) : Controller()
     fun logout() {
         if (!isLogged)
             return
+
+        println("DECOOO")
 
         val message = MessageFactory.createLogoutMessage()
         clientSocket.sendMessage(message)

@@ -37,8 +37,8 @@ class ServerMessageHandler(
                             sendMessage(socket, message)
                         }
                         MessageIdentifier.LOGOUT -> {
+                            clientSockets.removeIf { t -> t.socket == socket }
                             val username = message.content[0]
-                            // TODO: close socket
                             val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username déconnecté.\n"))
                             sendMessageToAll(newMessage)
                         }
