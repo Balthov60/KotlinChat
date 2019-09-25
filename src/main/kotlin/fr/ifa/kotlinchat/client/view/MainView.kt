@@ -127,7 +127,7 @@ class MainViewController : Controller()
         if (userName.value.isNullOrEmpty() || messageValues.value.isNullOrEmpty())
             return
 
-        val message = MessageFactory.createSendMessage(MessageIdentifier.SEND, userName.value, messageValues.value)
+        val message = MessageFactory.createSendMessage(userName.value, messageValues.value)
         clientSocket.sendMessage(message.toString())
         history.add(message)
     }

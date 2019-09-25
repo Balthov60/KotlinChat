@@ -3,16 +3,20 @@ package fr.ifa.kotlinchat.server
 import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
+import java.io.File
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class ServerMessageHandler(
     private val queue: Queue<Message>,
     private val clientSockets: ArrayList<KotlinChatSocket>
 ) : Thread()
 {
+    private val usersPortMap = HashMap<String, Int>()
     override fun run() {
+        val file = File("history.txt")
         try {
             while (true) {
                 if (queue.isNotEmpty()) {
@@ -28,7 +32,9 @@ class ServerMessageHandler(
                             sendMessage(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            println("SEEEND ${message.identifier} ${message.getUsername()} ${message.getUserMessageContent()}")
+                            val json = message.toTxt()
+                            file.appendText(json);
+                            sendMessage(message)
                         }
                         MessageIdentifier.LOGOUT -> {
                             val username = message.content[0]
@@ -45,13 +51,6 @@ class ServerMessageHandler(
             e.printStackTrace()
         }
     }
-
-//    fun sendMessage(identifier: MessageIdentifier = MessageIdentifier.SEND, content: String) {
-//        val message = "$identifier|$content"
-//        for (socket in clientSockets) {
-//            socket.sendMessage(message)
-//        }
-//    }
 
     fun sendMessage(message: Message) {
         for (socket in clientSockets) {

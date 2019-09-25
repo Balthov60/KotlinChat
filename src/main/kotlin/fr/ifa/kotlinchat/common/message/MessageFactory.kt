@@ -5,8 +5,8 @@ object MessageFactory {
         return "$identifier|$content\n"
     }
 
-    fun createSendMessage(identifier: MessageIdentifier, username: String, content: String): Message {
-        return Message(identifier, arrayListOf(username, content))
+    fun createSendMessage(username: String, content: String): Message {
+        return Message(MessageIdentifier.SEND, arrayListOf(username, content))
     }
 
     fun createMessageFromString(message: String): Message {

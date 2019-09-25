@@ -6,6 +6,8 @@ data class Message(
 ) {
     override fun toString() = "$identifier|${content.joinToString("|")}\n"
 
+    fun toTxt() = "username = \"${content[0]}\", content : \"${content[1]}\"\n"
+
     fun getUsername() : String {
         return content[0]
     }
