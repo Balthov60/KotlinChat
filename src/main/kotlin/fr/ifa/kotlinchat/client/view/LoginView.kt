@@ -8,6 +8,8 @@ import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import tornadofx.*
+import java.net.Socket
+import java.util.*
 
 class LoginView : View("Chat Login") {
 
@@ -41,7 +43,7 @@ class LoginView : View("Chat Login") {
 
 class MainViewController : Controller()
 {
-    private val clientSocket = KotlinChatSocket("127.0.0.1", 4242)
+    private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), ArrayDeque())
 
     val userName = SimpleStringProperty("")
     val messageValues = SimpleStringProperty("")
