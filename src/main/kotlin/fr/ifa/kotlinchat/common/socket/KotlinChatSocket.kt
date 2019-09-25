@@ -26,19 +26,16 @@ class KotlinChatSocket(
                 println("Message received : $line")
 
                 if (!line.isNullOrEmpty())
-                {
-                    val message = MessageFactory.createMessageFromString(line)
                     messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
-                    println("Message Pushed to Queue : $message | ${messageProcessingQueue.size} | ${System.identityHashCode(messageProcessingQueue)}")
-                }
             }
         }
     }
 
     fun sendMessage(message: String)
     {
-        print("Message sent : $message")
         outputStream.write(message)
         outputStream.flush()
+
+        print("Message sent : $message")
     }
 }

@@ -15,11 +15,11 @@ import javafx.geometry.VPos
 import tornadofx.*
 import java.net.Socket
 import java.util.concurrent.ArrayBlockingQueue
-import kotlin.concurrent.thread
+import kotlin.concurrent.fixedRateTimer
 
 class MainView : View("Kotlin Chat") {
 
-    private val controller = MainViewController()
+    private val controller = MainViewController(this)
 
     init {
         importStylesheet<GlobalStyles>()
@@ -30,6 +30,10 @@ class MainView : View("Kotlin Chat") {
             useMaxWidth = true
             addClass(Styles.heading)
         }
+
+        label(controller.errorMessage)
+                .visibleWhen(controller.displayErrorMessage)
+                .addClass(GlobalStyles.errorMessage)
 
         vbox {
             addClass(GlobalStyles.defaultPadding)
@@ -76,8 +80,10 @@ class MainView : View("Kotlin Chat") {
     }
 }
 
-class MainViewController : Controller()
+class MainViewController(mainView: MainView) : Controller()
 {
+    class UpdateHistoryRequest(val message: Message) : FXEvent()
+
     private val receivedMessageQueue = ArrayBlockingQueue<Message>(10)
     private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
 
@@ -89,20 +95,14 @@ class MainViewController : Controller()
     val displayErrorMessage = SimpleBooleanProperty(false)
 
     init {
-        thread {
-            println("${System.identityHashCode(receivedMessageQueue)}")
-            while(true) {
-                if (receivedMessageQueue.size > 0)
-                    println("test")
+        subscribe<UpdateHistoryRequest> { history.add(it.message) }
 
-                val message = receivedMessageQueue.poll()
+        fixedRateTimer("timer", false, 0L, 100) {
+            val message = receivedMessageQueue.poll() ?: return@fixedRateTimer
 
-                if (message == null)
-                    continue
-
-                println(message)
-                if (message.identifier == MessageIdentifier.SEND)
-                    history.add(message)
+            if (message.identifier == MessageIdentifier.SEND)
+            {
+                fire(UpdateHistoryRequest(message))
             }
         }
     }
