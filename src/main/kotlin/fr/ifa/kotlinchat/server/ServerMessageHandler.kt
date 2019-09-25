@@ -30,7 +30,7 @@ class ServerMessageHandler(
                             val username = message.content[0]
                             //TODO: get history
                             val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username connecté.\n"))
-                            sendMessage(socket, newMessage)
+                            sendMessageToAll(newMessage)
                         }
                         MessageIdentifier.SEND -> {
                             file.appendText(message.toString());
@@ -40,7 +40,7 @@ class ServerMessageHandler(
                             val username = message.content[0]
                             // TODO: close socket
                             val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username déconnecté.\n"))
-                            sendMessage(socket, newMessage)
+                            sendMessageToAll(newMessage)
                         }
                         else -> {
 
@@ -57,6 +57,12 @@ class ServerMessageHandler(
         for (clientSocket in clientSockets) {
             if (fromSocket != clientSocket.socket)
                 clientSocket.sendMessage(message)
+        }
+    }
+
+    fun sendMessageToAll(message: Message) {
+        for (clientSocket in clientSockets) {
+            clientSocket.sendMessage(message)
         }
     }
 }
