@@ -28,10 +28,7 @@ class ServerMessageHandler(
                             sendMessage(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            val identifier = message.identifier
-                            val username = message.content[0]
-                            val mes = message.content[1]
-                            println("SEEEND $identifier $username $mes")
+                            println("SEEEND ${message.identifier} ${message.getUsername()} ${message.getUserMessageContent()}")
                         }
                         MessageIdentifier.LOGOUT -> {
                             val username = message.content[0]

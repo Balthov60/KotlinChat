@@ -22,15 +22,19 @@ class KotlinChatSocket(
         thread {
             while(true)
             {
+                println("Wait Message from ${socket.inetAddress}:${socket.port}/${socket.localPort}")
                 val line = inputStream.readLine()
                 println("Message received : $line")
-                messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
+
+                if (!line.isNullOrEmpty())
+                    messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
             }
         }
     }
 
     fun sendMessage(message: String)
     {
+        print("Message sent : $message")
         outputStream.write(message)
         outputStream.flush()
     }

@@ -2,6 +2,7 @@ package fr.ifa.kotlinchat.client.view
 
 import fr.balthazarfrolin.kotlin.tools.views.GlobalStyles
 import fr.ifa.kotlinchat.client.app.Styles
+import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.message.MessageFactory
 import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
@@ -14,6 +15,10 @@ import javafx.geometry.VPos
 import tornadofx.*
 import java.net.Socket
 import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingDeque
+import java.util.concurrent.BlockingQueue
+import kotlin.concurrent.thread
 
 class MainView : View("Kotlin Chat") {
 
@@ -48,10 +53,9 @@ class MainView : View("Kotlin Chat") {
 
         listview(controller.history) {
             cellFormat { value ->
-                println("test : $value")
                 graphic = vbox {
-                    label("Message de : test").addClass(GlobalStyles.bottomBorder)
-                    label(value)
+                    label("Message de : ${value.getUsername()}").addClass(GlobalStyles.bottomBorder)
+                    label(value.getUserMessageContent())
                 }
             }
         }
@@ -77,18 +81,29 @@ class MainView : View("Kotlin Chat") {
 
 class MainViewController : Controller()
 {
-    private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), ArrayDeque())
+    private val receivedMessageQueue = ArrayDeque<Message>()
+    private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
 
-    val history: ObservableList<String> = FXCollections.observableArrayList("test", "top")
+    val history: ObservableList<Message> = FXCollections.observableArrayList()
     val userName = SimpleStringProperty("")
     val messageValues = SimpleStringProperty("")
 
     val errorMessage = SimpleStringProperty("")
     val displayErrorMessage = SimpleBooleanProperty(false)
 
+    init {
+        thread {
+            while(true) {
+                val message = receivedMessageQueue.peek() ?: continue
+
+                if (message.identifier == MessageIdentifier.SEND)
+                    history.add(message)
+            }
+        }
+    }
+
     fun login(): Boolean
     {
-        history.add("teste");
         if (userName.value.isNullOrEmpty() || userName.value == "server")
         {
             displayError("Nom d'utilisateur non valide...")
@@ -109,6 +124,11 @@ class MainViewController : Controller()
     }
 
     fun sendMessage() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (userName.value.isNullOrEmpty() || messageValues.value.isNullOrEmpty())
+            return
+
+        val message = MessageFactory.createSendMessage(MessageIdentifier.SEND, userName.value, messageValues.value)
+        clientSocket.sendMessage(message.toString())
+        history.add(message)
     }
 }
