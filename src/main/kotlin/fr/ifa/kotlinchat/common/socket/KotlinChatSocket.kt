@@ -11,8 +11,8 @@ import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
 
 class KotlinChatSocket(
-        private val socket: Socket,
-        messageProcessingQueue: BlockingQueue<Message>
+        val socket: Socket,
+        messageProcessingQueue: BlockingQueue<Pair<Socket, Message>>
 ) {
     private val outputStream: BufferedWriter = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
     private val inputStream: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -28,7 +28,7 @@ class KotlinChatSocket(
                 if (!line.isNullOrEmpty())
                 {
                     val message = MessageFactory.createMessageFromString(line)
-                    messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
+                    messageProcessingQueue.add(Pair(socket, MessageFactory.createMessageFromString(line)))
                     println("Message Pushed to Queue : $message | ${messageProcessingQueue.size} | ${System.identityHashCode(messageProcessingQueue)}")
                 }
             }
