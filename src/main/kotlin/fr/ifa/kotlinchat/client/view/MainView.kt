@@ -44,7 +44,11 @@ class MainView : View("Kotlin Chat") {
 
                 label("Nom d'utilisateur : ")
                 textfield(controller.userName)
-                button("Se Connecter").action { controller.login() }
+
+                vbox {
+                    button("Se Connecter").action { controller.login() }
+                    button("Se Déconnecter").action { controller.logout() }
+                }
             }
 
             useMaxWidth = true
@@ -94,6 +98,8 @@ class MainViewController(mainView: MainView) : Controller()
     val errorMessage = SimpleStringProperty("")
     val displayErrorMessage = SimpleBooleanProperty(false)
 
+    var isLogged = false
+
     init {
         subscribe<UpdateHistoryRequest> { history.add(it.message) }
 
@@ -108,17 +114,31 @@ class MainViewController(mainView: MainView) : Controller()
         }
     }
 
-    fun login(): Boolean
-    {
-        if (userName.value.isNullOrEmpty() || userName.value == "server")
-        {
+    fun login() {
+        if (userName.value.isNullOrEmpty() || userName.value == "server") {
             displayError("Nom d'utilisateur non valide...")
-            return false
+            return
         }
 
-        val message = MessageFactory.createSimpleMessage(MessageIdentifier.LOGIN, userName.value)
+        val message = MessageFactory.createLoginMessage(userName.value)
         clientSocket.sendMessage(message)
-        return true
+    }
+
+    fun logout() {
+        if (!isLogged)
+            return
+
+        val message = MessageFactory.createLogoutMessage()
+        clientSocket.sendMessage(message)
+    }
+
+    fun sendMessage() {
+        if (userName.value.isNullOrEmpty() || messageValues.value.isNullOrEmpty())
+            return
+
+        val message = MessageFactory.createSendMessage(userName.value, messageValues.value)
+        clientSocket.sendMessage(message)
+        history.add(message)
     }
 
     /* UI */
@@ -127,14 +147,5 @@ class MainViewController(mainView: MainView) : Controller()
     {
         errorMessage.set(message);
         displayErrorMessage.set(true)
-    }
-
-    fun sendMessage() {
-        if (userName.value.isNullOrEmpty() || messageValues.value.isNullOrEmpty())
-            return
-
-        val message = MessageFactory.createSendMessage(userName.value, messageValues.value)
-        clientSocket.sendMessage(message.toString())
-        history.add(message)
     }
 }
