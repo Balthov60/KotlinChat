@@ -4,6 +4,7 @@ import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import java.net.ServerSocket
 import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -18,7 +19,7 @@ class ChatServer(
             listenSocket = ServerSocket(portNumber) //port
             println("Server ready...")
 
-            val queue: Queue<Message> = ArrayDeque()
+            val queue: ArrayBlockingQueue<Message> = ArrayBlockingQueue(10)
             val clientSockets = ArrayList<KotlinChatSocket>()
 
             // Create ServerMessageHandler with queue & clientSockets -- Start
