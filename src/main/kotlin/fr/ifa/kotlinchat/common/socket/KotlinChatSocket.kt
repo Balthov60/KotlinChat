@@ -11,8 +11,8 @@ import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
 
 class KotlinChatSocket(
-        private val socket: Socket,
-        messageProcessingQueue: BlockingQueue<Message>
+        val socket: Socket,
+        messageProcessingQueue: BlockingQueue<Pair<Socket, Message>>
 ) {
     private val outputStream: BufferedWriter = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
     private val inputStream: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -26,7 +26,7 @@ class KotlinChatSocket(
                 println("Message received : $line")
 
                 if (!line.isNullOrEmpty())
-                    messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
+                    messageProcessingQueue.add(Pair(socket, MessageFactory.createMessageFromString(line)))
             }
         }
     }

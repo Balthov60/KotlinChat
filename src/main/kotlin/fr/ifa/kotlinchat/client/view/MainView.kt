@@ -84,7 +84,7 @@ class MainViewController(mainView: MainView) : Controller()
 {
     class UpdateHistoryRequest(val message: Message) : FXEvent()
 
-    private val receivedMessageQueue = ArrayBlockingQueue<Message>(10)
+    private val receivedMessageQueue = ArrayBlockingQueue<Pair<Socket, Message>>(10)
     private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
 
     val history: ObservableList<Message> = FXCollections.observableArrayList()
@@ -98,7 +98,8 @@ class MainViewController(mainView: MainView) : Controller()
         subscribe<UpdateHistoryRequest> { history.add(it.message) }
 
         fixedRateTimer("timer", false, 0L, 100) {
-            val message = receivedMessageQueue.poll() ?: return@fixedRateTimer
+            val pair = receivedMessageQueue.poll() ?: return@fixedRateTimer
+            val message = pair.second
 
             if (message.identifier == MessageIdentifier.SEND)
             {
@@ -132,7 +133,7 @@ class MainViewController(mainView: MainView) : Controller()
         if (userName.value.isNullOrEmpty() || messageValues.value.isNullOrEmpty())
             return
 
-        val message = MessageFactory.createSendMessage(MessageIdentifier.SEND, userName.value, messageValues.value)
+        val message = MessageFactory.createSendMessage(userName.value, messageValues.value)
         clientSocket.sendMessage(message.toString())
         history.add(message)
     }
