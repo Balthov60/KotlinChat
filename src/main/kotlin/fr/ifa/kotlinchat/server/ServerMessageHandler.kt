@@ -1,6 +1,7 @@
 package fr.ifa.kotlinchat.server
 
 import fr.ifa.kotlinchat.common.message.Message
+import fr.ifa.kotlinchat.common.message.MessageFactory
 import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import java.io.File
@@ -13,54 +14,74 @@ class ServerMessageHandler(
         private val clientSockets: ArrayList<KotlinChatSocket>
 ) : Thread()
 {
-    override fun run() {
-        val file = File("history.txt")
-        try {
-            while (true) {
-                if (queue.isNotEmpty()) {
-                    // Dépiler queue
-                    val received = queue.poll()
-                    val message = received.second
-                    val socket = received.first
+    private val historyFile = File("history.txt")
+
+    override fun run()
+    {
+        try
+        {
+            while (true)
+            {
+                if (queue.isNotEmpty())
+                {
+                    val messageReceived = queue.poll()
+                    val message = messageReceived.second
+                    val socket = messageReceived.first
 
                     println("Debug: ServerMessageHandle : ID = ${message.identifier} | C = ${message.content}")
 
-                    when (message.identifier) {
+                    when (message.identifier)
+                    {
                         MessageIdentifier.LOGIN -> {
                             val username = message.content[0]
-                            //TODO: get history
-                            val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username connecté.\n"))
+
+                            // Send History
+                            val history = historyFile.readText()
+                            if (history.isNotEmpty()) {
+                                val historyMessage = MessageFactory.createMessageFromHistory(historyFile.readText())
+                                sendMessageTo(socket, historyMessage)
+                            }
+
+                            // Send Login Message
+                            val newMessage = MessageFactory.createSendMessage("server", "$username connecté.")
                             sendMessageToAll(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            file.appendText(message.toString());
-                            sendMessage(socket, message)
+                            println("Append to History : ${message.toString()}")
+                            historyFile.appendText(message.toString())
+                            sendMessageFrom(socket, message)
                         }
                         MessageIdentifier.LOGOUT -> {
-                            val username = message.content[0]
-                            val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username déconnecté.\n"))
-                            sendMessageToAll(newMessage)
-                            clientSockets.removeIf { t -> t.socket == socket }
-                        }
-                        else -> {
+                            val socketIndex = clientSockets.indexOfFirst { t -> t.socket == socket }
+                            clientSockets[socketIndex].close()
+                            clientSockets.removeAt(socketIndex)
 
+                            val username = message.content[0]
+                            val newMessage = MessageFactory.createSendMessage("server", "$username déconnecté.\n")
+                            sendMessageToAll(newMessage)
                         }
+                        else -> {}
                     }
                 }
             }
-        } catch (e: IOException) {
+        }
+        catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
-    fun sendMessage(fromSocket: Socket, message: Message) {
+    private fun sendMessageFrom(fromSocket: Socket, message: Message) {
         for (clientSocket in clientSockets) {
             if (fromSocket != clientSocket.socket)
                 clientSocket.sendMessage(message)
         }
     }
+    private fun sendMessageTo(toSocket: Socket, message: Message) {
+        val socketIndex = clientSockets.indexOfFirst { it.socket == toSocket }
+        clientSockets[socketIndex].sendMessage(message)
+    }
 
-    fun sendMessageToAll(message: Message) {
+    private fun sendMessageToAll(message: Message) {
         for (clientSocket in clientSockets) {
             clientSocket.sendMessage(message)
         }

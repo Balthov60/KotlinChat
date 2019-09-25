@@ -1,11 +1,4 @@
-SEND|Jacques|Salut
-SEND|MicheL|Salut
-SEND|Jacques|Tu vas bien ?
-SEND|MicheL|Oh oui ! j'adore
-SEND|25.09.2019 à 14:35:57|Michel|Salut
-SEND|25.09.2019 à 15:02:17|Testeur|Salut !
-SEND|25.09.2019 à 15:04:45|Top|Salut
-SEND|25.09.2019 à 15:04:47|Testeur|Hey!
-SEND|25.09.2019 à 15:06:07|Top|Salut
-SEND|25.09.2019 à 15:06:07|Top|Salut
-SEND|25.09.2019 à 15:06:08|Top|Salut
+SEND|25.09 à 23:23|Test|YOP
+SEND|25.09 à 23:23|tet|Yep
+SEND|25.09 à 23:38|rez|SLT
+SEND|25.09 à 23:41|qds|qsdaze

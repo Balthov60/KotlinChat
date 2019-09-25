@@ -7,6 +7,7 @@ import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.Socket
+import java.net.SocketException
 import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
 
@@ -17,18 +18,32 @@ class KotlinChatSocket(
     private val outputStream: BufferedWriter = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
     private val inputStream: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
 
-    init {
-        thread {
-            while(true)
-            {
-                println("Wait Message from ${socket.inetAddress}:${socket.port}/${socket.localPort}")
-                val line = inputStream.readLine()
-                println("Message received : $line")
+    private val listeningThread: Thread
 
-                if (!line.isNullOrEmpty())
-                    messageProcessingQueue.add(Pair(socket, MessageFactory.createMessageFromString(line)))
+    init {
+        listeningThread = thread {
+            try {
+                while (!socket.isClosed) {
+                    println("Wait Message from ${socket.inetAddress}:${socket.port}/${socket.localPort}")
+                    val line = inputStream.readLine()
+                    println("Message received : $line")
+
+                    if (!line.isNullOrEmpty())
+                        messageProcessingQueue.add(Pair(socket, MessageFactory.createMessageFromString(line)))
+                }
+            }
+            catch (e: SocketException) {
+                return@thread
             }
         }
+    }
+
+    fun close()
+    {
+        println("Stop listening to messages")
+
+        listeningThread.interrupt()
+        socket.close()
     }
 
     fun sendMessage(message: Message)

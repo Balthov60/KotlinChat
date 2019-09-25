@@ -19,7 +19,7 @@ import kotlin.concurrent.fixedRateTimer
 
 class MainView : View("Kotlin Chat") {
 
-    private val controller = MainViewController(this)
+    private val controller = MainViewController()
 
     init {
         importStylesheet<GlobalStyles>()
@@ -41,7 +41,10 @@ class MainView : View("Kotlin Chat") {
                 textAlignment = TextAlignment.CENTER
             }
 
-            center = textfield(controller.userName).borderpaneConstraints { margin = Insets(10.0, 10.0, 10.0, 10.0) }
+            center = textfield(controller.userName) {
+                borderpaneConstraints { margin = Insets(10.0, 10.0, 10.0, 10.0) }
+                editableWhen(controller.isLogged.not())
+            }
 
             right = vbox {
                 button("Se Connecter") {
@@ -53,12 +56,12 @@ class MainView : View("Kotlin Chat") {
                     action { controller.logout() }
                 }
             }
-        }
+            }
 
         listview(controller.history) {
             cellFormat { value ->
                 graphic = vbox {
-                    label("Message de : ${value.getUsername()} le ${value.time}").addClass(GlobalStyles.bottomBorder)
+                    label("Message de : ${value.getUsername()} le ${value.getUserMessageTime()}").addClass(GlobalStyles.bottomBorder)
                     label(value.getUserMessageContent())
                 }
             }
@@ -83,11 +86,11 @@ class MainView : View("Kotlin Chat") {
     }
 }
 
-class MainViewController(mainView: MainView) : Controller()
+class MainViewController : Controller()
 {
     class UpdateHistoryRequest(val message: Message) : FXEvent()
 
-    private val receivedMessageQueue = ArrayBlockingQueue<Pair<Socket, Message>>(10)
+    private val receivedMessageQueue = ArrayBlockingQueue<Pair<Socket, Message>>(1000)
     private lateinit var clientSocket: KotlinChatSocket
 
     val history: ObservableList<Message> = FXCollections.observableArrayList()
@@ -97,7 +100,7 @@ class MainViewController(mainView: MainView) : Controller()
     val errorMessage = SimpleStringProperty("")
     val displayErrorMessage = SimpleBooleanProperty(false)
 
-    var isLogged = false
+    var isLogged = SimpleBooleanProperty(false)
 
     init {
         subscribe<UpdateHistoryRequest>()
@@ -109,9 +112,14 @@ class MainViewController(mainView: MainView) : Controller()
             val pair = receivedMessageQueue.poll() ?: return@fixedRateTimer
             val message = pair.second
 
-            if (message.identifier == MessageIdentifier.SEND)
+            when(message.identifier)
             {
-                fire(UpdateHistoryRequest(message))
+                MessageIdentifier.SEND -> fire(UpdateHistoryRequest(message))
+                MessageIdentifier.HISTORY -> {
+                    for (historyMessage in message.getHistoryMessagesList())
+                    fire(UpdateHistoryRequest(historyMessage))
+                }
+                else -> return@fixedRateTimer
             }
         }
     }
@@ -120,24 +128,25 @@ class MainViewController(mainView: MainView) : Controller()
         if (userName.value.isNullOrEmpty() || userName.value == "server") {
             displayError("Nom d'utilisateur non valide...")
             return
-        } else if (isLogged) { return }
+        } else if (isLogged.value) { return }
 
         history.clear()
         clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
-        isLogged = true
+        isLogged.set(true)
 
         val message = MessageFactory.createLoginMessage(userName.value)
         clientSocket.sendMessage(message)
     }
 
     fun logout() {
-        if (!isLogged)
+        if (!isLogged.value)
             return
 
-        isLogged = false
+        isLogged.set(false)
 
         val message = MessageFactory.createLogoutMessage(userName.value)
         clientSocket.sendMessage(message)
+        clientSocket.close()
     }
 
     fun sendMessage() {

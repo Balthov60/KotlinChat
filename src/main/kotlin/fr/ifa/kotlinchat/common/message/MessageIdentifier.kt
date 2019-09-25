@@ -8,3 +8,5 @@ enum class MessageIdentifier
     SEND_MULTI,
     LOGOUT,
 }
+
+const val END_DELIMITER = "/END"

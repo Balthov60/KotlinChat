@@ -17,26 +17,22 @@ class ChatServer(
         val listenSocket: ServerSocket
 
         try {
-            listenSocket = ServerSocket(portNumber) //port
-            println("Server ready...")
+            listenSocket = ServerSocket(portNumber)
+            println("Server ready on ${listenSocket.inetAddress}:${listenSocket.localPort}")
 
-            val queue: ArrayBlockingQueue<Pair<Socket, Message>> = ArrayBlockingQueue(10)
+            val queue: ArrayBlockingQueue<Pair<Socket, Message>> = ArrayBlockingQueue(1000)
             val clientSockets = ArrayList<KotlinChatSocket>()
 
-            // Create ServerMessageHandler with queue & clientSockets -- Start
-            val serverMessageHandler = ServerMessageHandler(queue, clientSockets)
-            serverMessageHandler.start()
+            ServerMessageHandler(queue, clientSockets).start()
 
             while (true) {
                 val clientSocket = listenSocket.accept()
-                println("Connexion from:" + clientSocket.inetAddress)
+                println("Connexion from : ${clientSocket.inetAddress}:${clientSocket.port}")
 
-                // Create Socket and it to clientSockets
-                val socket = KotlinChatSocket(clientSocket, queue)
-                clientSockets.add(socket)
+                clientSockets.add(KotlinChatSocket(clientSocket, queue))
             }
         } catch (e: Exception) {
-            System.err.println("Error in EchoServer:$e")
+            System.err.println("Error in KotlinChatServer:$e")
         }
 
     }
@@ -45,7 +41,7 @@ class ChatServer(
 fun main(args: Array<String>)
 {
     if (args.size != 1) {
-        println("Usage: java EchoServer <EchoServer port>")
+        println("Usage: java KotlinChatServer <KotlinChatServer port>")
         exitProcess(1)
     }
 
