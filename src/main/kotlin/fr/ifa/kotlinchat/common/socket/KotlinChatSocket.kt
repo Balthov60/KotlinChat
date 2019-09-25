@@ -23,7 +23,7 @@ class KotlinChatSocket(
             while(true)
             {
                 val line = inputStream.readLine()
-                println("Debug: Message Received - $line")
+                println("Message received : $line")
                 messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
             }
         }
@@ -31,7 +31,6 @@ class KotlinChatSocket(
 
     fun sendMessage(message: String)
     {
-        println("Debug: Send Message - $message")
         outputStream.write(message)
         outputStream.flush()
     }

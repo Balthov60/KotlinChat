@@ -1,12 +1,11 @@
 package fr.ifa.kotlinchat.server
 
 import fr.ifa.kotlinchat.common.message.Message
-import fr.ifa.kotlinchat.common.message.MessageFactory
 import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
-import java.io.*
-import java.net.Socket
+import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
 
 class ServerMessageHandler(
     private val queue: Queue<Message>,
@@ -24,57 +23,42 @@ class ServerMessageHandler(
 
                     when (message.identifier) {
                         MessageIdentifier.LOGIN -> {
-                            sendMessage("SEND|Bienvenue ${message.content} !\n")
+                            val username = message.content[0]
+                            val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username connecté.\n"))
+                            sendMessage(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            
+                            val identifier = message.identifier
+                            val username = message.content[0]
+                            val mes = message.content[1]
+                            println("SEEEND $identifier $username $mes")
                         }
                         MessageIdentifier.LOGOUT -> {
-
+                            val username = message.content[0]
+                            val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username déconnecté.\n"))
+                            sendMessage(newMessage)
                         }
                         else -> {
 
                         }
                     }
                 }
-/*
-                try {
-                    if (line == null)
-                        continue
-                    println(line)
-
-                    val message = MessageFactory.createMessageFromString(line)
-
-                    // while not logged
-                    if (!isLogged) {
-                        if (message.identifier == MessageIdentifier.LOGIN) {
-                            isLogged = true
-                            username = message.content
-                            sendMessage("Bienvenue $username !\n")
-                            println("salut")
-                        } else {
-                            continue
-                        }
-                    }
-
-                    // send History
-
-                    // while (check disconnection)
-                } catch (iae: IllegalArgumentException) {
-                    iae.printStackTrace()
-                }
-
- */
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
     }
 
-    fun sendMessage(message: String) {
+//    fun sendMessage(identifier: MessageIdentifier = MessageIdentifier.SEND, content: String) {
+//        val message = "$identifier|$content"
+//        for (socket in clientSockets) {
+//            socket.sendMessage(message)
+//        }
+//    }
+
+    fun sendMessage(message: Message) {
         for (socket in clientSockets) {
-            socket.sendMessage(message)
+            socket.sendMessage(message.toString())
         }
     }
 }
