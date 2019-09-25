@@ -1,0 +1,4 @@
+SEND|Jacques|Salut
+SEND|MicheL|Salut
+SEND|Jacques|Tu vas bien ?
+SEND|MicheL|Oh oui ! j'adore
