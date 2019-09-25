@@ -56,13 +56,13 @@ class ServerMessageHandler(
     fun sendMessage(fromSocket: Socket, message: Message) {
         for (clientSocket in clientSockets) {
             if (fromSocket != clientSocket.socket)
-                clientSocket.sendMessage(message.toString())
+                clientSocket.sendMessage(message)
         }
     }
 
     fun sendMessageToAll(message: Message) {
         for (clientSocket in clientSockets) {
-            clientSocket.sendMessage(message.toString())
+            clientSocket.sendMessage(message)
         }
     }
 }

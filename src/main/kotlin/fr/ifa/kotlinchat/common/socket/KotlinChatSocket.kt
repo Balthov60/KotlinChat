@@ -31,9 +31,9 @@ class KotlinChatSocket(
         }
     }
 
-    fun sendMessage(message: String)
+    fun sendMessage(message: Message)
     {
-        outputStream.write(message)
+        outputStream.write(message.toString())
         outputStream.flush()
 
         print("Message sent : $message")

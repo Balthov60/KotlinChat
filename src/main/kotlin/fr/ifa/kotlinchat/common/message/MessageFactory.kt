@@ -13,4 +13,12 @@ object MessageFactory {
         val content: List<String> = args.subList(1, args.size)
         return Message(MessageIdentifier.valueOf(args[0]), content)
     }
+
+    fun createLoginMessage(username: String): Message {
+        return Message(MessageIdentifier.LOGIN, arrayListOf(username))
+    }
+
+    fun createLogoutMessage(): Message {
+        return Message(MessageIdentifier.LOGOUT, emptyList())
+    }
 }
