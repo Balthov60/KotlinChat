@@ -26,7 +26,7 @@ object MessageFactory {
         return Message(MessageIdentifier.LOGIN, arrayListOf(username))
     }
 
-    fun createLogoutMessage(): Message {
-        return Message(MessageIdentifier.LOGOUT, emptyList())
+    fun createLogoutMessage(username: String): Message {
+        return Message(MessageIdentifier.LOGOUT, arrayListOf(username))
     }
 }

@@ -119,7 +119,7 @@ class MainViewController(mainView: MainView) : Controller()
         if (userName.value.isNullOrEmpty() || userName.value == "server") {
             displayError("Nom d'utilisateur non valide...")
             return
-        }
+        } else if (isLogged) { return }
 
         clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
         isLogged = true
@@ -132,9 +132,9 @@ class MainViewController(mainView: MainView) : Controller()
         if (!isLogged)
             return
 
-        println("DECOOO")
+        isLogged = false
 
-        val message = MessageFactory.createLogoutMessage()
+        val message = MessageFactory.createLogoutMessage(userName.value)
         clientSocket.sendMessage(message)
     }
 
