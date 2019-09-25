@@ -1,7 +1,12 @@
 package fr.ifa.kotlinchat.server
 
+import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import java.net.ServerSocket
+import java.net.Socket
+import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
+import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
@@ -15,16 +20,20 @@ class ChatServer(
             listenSocket = ServerSocket(portNumber) //port
             println("Server ready...")
 
-            // Create Queue
+            val queue: ArrayBlockingQueue<Pair<Socket, Message>> = ArrayBlockingQueue(10)
             val clientSockets = ArrayList<KotlinChatSocket>()
+
             // Create ServerMessageHandler with queue & clientSockets -- Start
+            val serverMessageHandler = ServerMessageHandler(queue, clientSockets)
+            serverMessageHandler.start()
 
             while (true) {
                 val clientSocket = listenSocket.accept()
                 println("Connexion from:" + clientSocket.inetAddress)
 
-                // Create Socket
-                // Add socket to clientSockets
+                // Create Socket and it to clientSockets
+                val socket = KotlinChatSocket(clientSocket, queue)
+                clientSockets.add(socket)
             }
         } catch (e: Exception) {
             System.err.println("Error in EchoServer:$e")

@@ -10,8 +10,8 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.geometry.HPos
-import javafx.geometry.VPos
+import javafx.geometry.Insets
+import javafx.scene.text.TextAlignment
 import tornadofx.*
 import java.net.Socket
 import java.util.concurrent.ArrayBlockingQueue
@@ -31,55 +31,54 @@ class MainView : View("Kotlin Chat") {
             addClass(Styles.heading)
         }
 
-        label(controller.errorMessage)
-                .visibleWhen(controller.displayErrorMessage)
-                .addClass(GlobalStyles.errorMessage)
-
-        vbox {
-            addClass(GlobalStyles.defaultPadding)
-
-            borderpane {
+        borderpane {
+            vboxConstraints {
+                margin = Insets(10.0, 10.0, 10.0, 10.0)
+                isFillWidth = true
+            }
+            left = label("Nom d'utilisateur : ") {
                 useMaxSize = true
-                style { rowVAlignment = VPos.CENTER }
-
-                left = label("Nom d'utilisateur : ")
-                center = textfield(controller.userName)
-
-                right = vbox {
-                    button("Se Connecter").action { controller.login() }
-                    button("Se Déconnecter").action { controller.logout() }
-                }
+                textAlignment = TextAlignment.CENTER
             }
 
-            useMaxWidth = true
-            addClass(GlobalStyles.bottomBorder)
-        }
+            center = textfield(controller.userName).borderpaneConstraints { margin = Insets(10.0, 10.0, 10.0, 10.0) }
 
+            right = vbox {
+                button("Se Connecter") {
+                    vboxConstraints { margin = Insets(0.0, 0.0, 5.0, 0.0) }
+                    action { controller.login() }
+                }
+                button("Se Déconnecter") {
+                    vboxConstraints { margin = Insets(5.0, 0.0, 0.0, 0.0) }
+                    action { controller.logout() }
+                }
+            }
+        }
 
         listview(controller.history) {
             cellFormat { value ->
                 graphic = vbox {
-                    label("Message de : ${value.getUsername()}").addClass(GlobalStyles.bottomBorder)
+                    label("Message de : ${value.getUsername()} le ${value.time}").addClass(GlobalStyles.bottomBorder)
                     label(value.getUserMessageContent())
                 }
             }
         }
 
+        label(controller.errorMessage)
+                .visibleWhen(controller.displayErrorMessage)
+                .addClass(GlobalStyles.errorMessage)
 
-        form {
-            fieldset("Nouveau Message") {
-                useMaxWidth = true
-                // style { backgroundColor += Color.RED }
+        label("Nouveau Message") {
+        }
 
-                textarea(controller.messageValues) {
-                    maxHeight = 100.0
-                }
+        textarea(controller.messageValues) {
+            vboxConstraints { margin = Insets(0.0, 0.0, 10.0, 0.0) }
+            maxHeight = 100.0
+        }
 
-                button("Envoyer") {
-                    style { hAlignment = HPos.RIGHT }
-                    action { controller.sendMessage() }
-                }
-            }
+        button("Envoyer") {
+            useMaxWidth = true
+            action { controller.sendMessage() }
         }
     }
 }
@@ -89,7 +88,7 @@ class MainViewController(mainView: MainView) : Controller()
     class UpdateHistoryRequest(val message: Message) : FXEvent()
 
     private val receivedMessageQueue = ArrayBlockingQueue<Pair<Socket, Message>>(10)
-    private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
+    private lateinit var clientSocket: KotlinChatSocket
 
     val history: ObservableList<Message> = FXCollections.observableArrayList()
     val userName = SimpleStringProperty("")
@@ -101,7 +100,10 @@ class MainViewController(mainView: MainView) : Controller()
     var isLogged = false
 
     init {
-        subscribe<UpdateHistoryRequest> { history.add(it.message) }
+        subscribe<UpdateHistoryRequest>()
+        {
+            history.add(0, it.message)
+        }
 
         fixedRateTimer("timer", false, 0L, 100) {
             val pair = receivedMessageQueue.poll() ?: return@fixedRateTimer
@@ -118,7 +120,11 @@ class MainViewController(mainView: MainView) : Controller()
         if (userName.value.isNullOrEmpty() || userName.value == "server") {
             displayError("Nom d'utilisateur non valide...")
             return
-        }
+        } else if (isLogged) { return }
+
+        history.clear()
+        clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
+        isLogged = true
 
         val message = MessageFactory.createLoginMessage(userName.value)
         clientSocket.sendMessage(message)
@@ -128,7 +134,9 @@ class MainViewController(mainView: MainView) : Controller()
         if (!isLogged)
             return
 
-        val message = MessageFactory.createLogoutMessage()
+        isLogged = false
+
+        val message = MessageFactory.createLogoutMessage(userName.value)
         clientSocket.sendMessage(message)
     }
 
@@ -138,7 +146,7 @@ class MainViewController(mainView: MainView) : Controller()
 
         val message = MessageFactory.createSendMessage(userName.value, messageValues.value)
         clientSocket.sendMessage(message)
-        history.add(message)
+        history.add(0, message)
     }
 
     /* UI */

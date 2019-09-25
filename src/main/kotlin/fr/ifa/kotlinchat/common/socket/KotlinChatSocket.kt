@@ -7,37 +7,35 @@ import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.Socket
-import java.util.*
+import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
 
-
 class KotlinChatSocket(
-        address: String,
-        port: Int,
-        messageProcessingQueue: Queue<Message>
+        val socket: Socket,
+        messageProcessingQueue: BlockingQueue<Pair<Socket, Message>>
 ) {
-    private val socket: Socket = Socket(address, port)
-    private val outputStream: BufferedWriter
-    private val inputStream: BufferedReader
+    private val outputStream: BufferedWriter = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
+    private val inputStream: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
 
     init {
-        outputStream = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
-        inputStream = BufferedReader(InputStreamReader(socket.getInputStream()))
-
         thread {
             while(true)
             {
+                println("Wait Message from ${socket.inetAddress}:${socket.port}/${socket.localPort}")
                 val line = inputStream.readLine()
-                println("Debug: Message Received - $line")
-                messageProcessingQueue.add(MessageFactory.createMessageFromString(line))
+                println("Message received : $line")
+
+                if (!line.isNullOrEmpty())
+                    messageProcessingQueue.add(Pair(socket, MessageFactory.createMessageFromString(line)))
             }
         }
     }
 
-    fun sendMessage(message: String)
+    fun sendMessage(message: Message)
     {
-        println("Debug: Send Message - $message")
-        outputStream.write(message)
+        outputStream.write(message.toString())
         outputStream.flush()
+
+        print("Message sent : $message")
     }
 }

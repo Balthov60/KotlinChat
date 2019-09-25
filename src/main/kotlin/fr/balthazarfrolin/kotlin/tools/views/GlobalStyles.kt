@@ -27,6 +27,8 @@ class GlobalStyles : Stylesheet()
             padding = SMALL_PADDING
         }
 
+        val bottomPadding by cssclass()
+
         val centeredText by cssclass()
         val centeredTextMixin = mixin {
             textAlignment = TextAlignment.CENTER
@@ -71,6 +73,11 @@ class GlobalStyles : Stylesheet()
         {
             +smallTextMixin
             +centeredTextMixin
+        }
+
+        bottomPadding()
+        {
+
         }
 
         bottomBorder()
