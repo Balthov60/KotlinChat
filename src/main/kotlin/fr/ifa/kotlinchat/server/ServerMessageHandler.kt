@@ -4,12 +4,12 @@ import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import java.io.IOException
-import java.util.*
+import java.util.concurrent.BlockingQueue
 import kotlin.collections.ArrayList
 
 class ServerMessageHandler(
-    private val queue: Queue<Message>,
-    private val clientSockets: ArrayList<KotlinChatSocket>
+        private val queue: BlockingQueue<Message>,
+        private val clientSockets: ArrayList<KotlinChatSocket>
 ) : Thread()
 {
     override fun run() {
@@ -28,10 +28,7 @@ class ServerMessageHandler(
                             sendMessage(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            val identifier = message.identifier
-                            val username = message.content[0]
-                            val mes = message.content[1]
-                            println("SEEEND $identifier $username $mes")
+                            println("SEEEND ${message.identifier} ${message.getUsername()} ${message.getUserMessageContent()}")
                         }
                         MessageIdentifier.LOGOUT -> {
                             val username = message.content[0]

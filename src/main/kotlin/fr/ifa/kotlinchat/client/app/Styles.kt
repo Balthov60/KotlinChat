@@ -1,5 +1,8 @@
 package fr.ifa.kotlinchat.client.app
 
+import fr.balthazarfrolin.kotlin.tools.views.GlobalStyles
+import javafx.geometry.HPos
+import javafx.geometry.VPos
 import javafx.scene.text.FontWeight
 import tornadofx.Stylesheet
 import tornadofx.box
@@ -12,10 +15,16 @@ class Styles : Stylesheet() {
     }
 
     init {
-        label and heading {
+        heading {
             padding = box(10.px)
             fontSize = 20.px
             fontWeight = FontWeight.BOLD
+            +GlobalStyles.centeredContentMixin
+        }
+
+        label {
+            padding = box(10.px)
+            vAlignment = VPos.CENTER
         }
     }
 }
