@@ -14,10 +14,7 @@ import javafx.geometry.HPos
 import javafx.geometry.VPos
 import tornadofx.*
 import java.net.Socket
-import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingDeque
-import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
 
 class MainView : View("Kotlin Chat") {
@@ -81,7 +78,7 @@ class MainView : View("Kotlin Chat") {
 
 class MainViewController : Controller()
 {
-    private val receivedMessageQueue = ArrayDeque<Message>()
+    private val receivedMessageQueue = ArrayBlockingQueue<Message>(10)
     private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
 
     val history: ObservableList<Message> = FXCollections.observableArrayList()
@@ -93,9 +90,17 @@ class MainViewController : Controller()
 
     init {
         thread {
+            println("${System.identityHashCode(receivedMessageQueue)}")
             while(true) {
-                val message = receivedMessageQueue.peek() ?: continue
+                if (receivedMessageQueue.size > 0)
+                    println("test")
 
+                val message = receivedMessageQueue.poll()
+
+                if (message == null)
+                    continue
+
+                println(message)
                 if (message.identifier == MessageIdentifier.SEND)
                     history.add(message)
             }

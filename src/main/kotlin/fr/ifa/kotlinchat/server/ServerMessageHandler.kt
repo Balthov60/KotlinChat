@@ -5,16 +5,15 @@ import fr.ifa.kotlinchat.common.message.MessageIdentifier
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import java.io.File
 import java.io.IOException
-import java.util.*
+import java.util.concurrent.BlockingQueue
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 class ServerMessageHandler(
-    private val queue: Queue<Message>,
-    private val clientSockets: ArrayList<KotlinChatSocket>
+        private val queue: BlockingQueue<Message>,
+        private val clientSockets: ArrayList<KotlinChatSocket>
 ) : Thread()
 {
-    private val usersPortMap = HashMap<String, Int>()
     override fun run() {
         val file = File("history.txt")
         try {
@@ -28,16 +27,17 @@ class ServerMessageHandler(
                     when (message.identifier) {
                         MessageIdentifier.LOGIN -> {
                             val username = message.content[0]
+                            //TODO: get history
                             val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username connecté.\n"))
                             sendMessage(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            val json = message.toTxt()
-                            file.appendText(json);
+                            file.appendText(message.toString());
                             sendMessage(message)
                         }
                         MessageIdentifier.LOGOUT -> {
                             val username = message.content[0]
+                            // TODO: close socket
                             val newMessage = Message(MessageIdentifier.SEND, listOf("SERVER", "$username déconnecté.\n"))
                             sendMessage(newMessage)
                         }

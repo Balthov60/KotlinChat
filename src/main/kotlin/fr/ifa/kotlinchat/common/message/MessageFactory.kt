@@ -9,10 +9,8 @@ object MessageFactory {
         return Message(MessageIdentifier.SEND, arrayListOf(username, content))
     }
 
-    fun createMessageFromString(message: String): Message {
-        val args: List<String> = message.split("|")
+    fun createMessageFromString(message: String): Message { val args: List<String> = message.split("|")
         val content: List<String> = args.subList(1, args.size)
         return Message(MessageIdentifier.valueOf(args[0]), content)
     }
-
 }
