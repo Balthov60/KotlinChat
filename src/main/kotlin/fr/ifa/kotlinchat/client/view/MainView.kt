@@ -12,6 +12,8 @@ import javafx.collections.ObservableList
 import javafx.geometry.HPos
 import javafx.geometry.VPos
 import tornadofx.*
+import java.net.Socket
+import java.util.*
 
 class MainView : View("Kotlin Chat") {
 
@@ -75,7 +77,7 @@ class MainView : View("Kotlin Chat") {
 
 class MainViewController : Controller()
 {
-    private val clientSocket = KotlinChatSocket("127.0.0.1", 4242)
+    private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), ArrayDeque())
 
     val history: ObservableList<String> = FXCollections.observableArrayList("test", "top")
     val userName = SimpleStringProperty("")

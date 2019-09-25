@@ -7,6 +7,7 @@ object MessageFactory {
 
     fun createMessageFromString(message: String): Message {
         val args: List<String> = message.split("|")
-        return Message(MessageIdentifier.valueOf(args[0]), args[1])
+        val content: List<String> = args.subList(1, args.size)
+        return Message(MessageIdentifier.valueOf(args[0]), content)
     }
 }
