@@ -78,7 +78,7 @@ class MainView : View("Kotlin Chat") {
 
 class MainViewController : Controller()
 {
-    private val receivedMessageQueue = ArrayBlockingQueue<Message>(10)
+    private val receivedMessageQueue = ArrayBlockingQueue<Pair<Socket, Message>>(10)
     private val clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
 
     val history: ObservableList<Message> = FXCollections.observableArrayList()
@@ -95,12 +95,13 @@ class MainViewController : Controller()
                 if (receivedMessageQueue.size > 0)
                     println("test")
 
-                val message = receivedMessageQueue.poll()
+                val received = receivedMessageQueue.poll()
 
-                if (message == null)
+                if (received == null)
                     continue
 
-                println(message)
+                println(received)
+                val message = received.second
                 if (message.identifier == MessageIdentifier.SEND)
                     history.add(message)
             }

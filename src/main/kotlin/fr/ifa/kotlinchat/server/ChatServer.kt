@@ -3,6 +3,7 @@ package fr.ifa.kotlinchat.server
 import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import java.net.ServerSocket
+import java.net.Socket
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.collections.ArrayList
@@ -19,7 +20,7 @@ class ChatServer(
             listenSocket = ServerSocket(portNumber) //port
             println("Server ready...")
 
-            val queue: ArrayBlockingQueue<Message> = ArrayBlockingQueue(10)
+            val queue: ArrayBlockingQueue<Pair<Socket, Message>> = ArrayBlockingQueue(10)
             val clientSockets = ArrayList<KotlinChatSocket>()
 
             // Create ServerMessageHandler with queue & clientSockets -- Start
