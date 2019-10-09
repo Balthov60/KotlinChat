@@ -44,12 +44,11 @@ class ServerMessageHandler(
 
                             // Send Login Message
                             val newMessage = MessageFactory.createSendMessage("server", "$username connecté.")
-                            sendMessageToAll(newMessage)
+                            sendMulticastMessage(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            println("Append to History : ${message.toString()}")
+                            println("Append to History : $message")
                             historyFile.appendText(message.toString())
-                            sendMessageFrom(socket, message)
                         }
                         MessageIdentifier.LOGOUT -> {
                             val socketIndex = clientSockets.indexOfFirst { t -> t.socket == socket }
@@ -58,7 +57,7 @@ class ServerMessageHandler(
 
                             val username = message.content[0]
                             val newMessage = MessageFactory.createSendMessage("server", "$username déconnecté.\n")
-                            sendMessageToAll(newMessage)
+                            sendMulticastMessage(newMessage)
                         }
                         else -> {}
                     }
@@ -70,20 +69,30 @@ class ServerMessageHandler(
         }
     }
 
-    private fun sendMessageFrom(fromSocket: Socket, message: Message) {
-        for (clientSocket in clientSockets) {
-            if (fromSocket != clientSocket.socket)
-                clientSocket.sendMessage(message)
-        }
+    private fun sendMulticastMessage(message: Message) {
+        if (clientSockets.size != 0)
+            clientSockets[0].sendMulticastMessage(message)
+        else
+            historyFile.appendText(message.toString())
     }
+
     private fun sendMessageTo(toSocket: Socket, message: Message) {
         val socketIndex = clientSockets.indexOfFirst { it.socket == toSocket }
         clientSockets[socketIndex].sendMessage(message)
     }
 
+    @Deprecated("Use Multicast Instead.")
     private fun sendMessageToAll(message: Message) {
         for (clientSocket in clientSockets) {
             clientSocket.sendMessage(message)
+        }
+    }
+
+    @Deprecated("SEND now use Multicast and don't transit through server.")
+    private fun sendMessageFrom(fromSocket: Socket, message: Message) {
+        for (clientSocket in clientSockets) {
+            if (fromSocket != clientSocket.socket)
+                clientSocket.sendMessage(message)
         }
     }
 }

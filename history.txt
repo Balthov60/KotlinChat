@@ -1,4 +1,0 @@
-SEND|25.09 à 23:23|Test|YOP
-SEND|25.09 à 23:23|tet|Yep
-SEND|25.09 à 23:38|rez|SLT
-SEND|25.09 à 23:41|qds|qsdaze

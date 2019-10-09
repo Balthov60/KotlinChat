@@ -4,10 +4,7 @@ import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.socket.KotlinChatSocket
 import java.net.ServerSocket
 import java.net.Socket
-import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
-import kotlin.collections.ArrayList
-import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 class ChatServer(
@@ -31,7 +28,8 @@ class ChatServer(
 
                 clientSockets.add(KotlinChatSocket(clientSocket, queue))
             }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             System.err.println("Error in KotlinChatServer:$e")
         }
 

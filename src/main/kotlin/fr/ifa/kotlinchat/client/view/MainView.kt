@@ -103,9 +103,9 @@ class MainViewController : Controller()
     var isLogged = SimpleBooleanProperty(false)
 
     init {
-        subscribe<UpdateHistoryRequest>()
-        {
-            history.add(0, it.message)
+        subscribe<UpdateHistoryRequest> {
+            if (it.message.getUsername() != userName.value)
+                history.add(0, it.message)
         }
 
         fixedRateTimer("timer", false, 0L, 100) {
@@ -154,7 +154,7 @@ class MainViewController : Controller()
             return
 
         val message = MessageFactory.createSendMessage(userName.value, messageValues.value)
-        clientSocket.sendMessage(message)
+        clientSocket.sendMulticastMessage(message)
         history.add(0, message)
     }
 
