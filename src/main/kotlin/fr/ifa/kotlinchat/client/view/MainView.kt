@@ -1,6 +1,7 @@
 package fr.ifa.kotlinchat.client.view
 
 import fr.balthazarfrolin.kotlin.tools.views.GlobalStyles
+import fr.ifa.kotlinchat.client.app.AppParameters
 import fr.ifa.kotlinchat.client.app.Styles
 import fr.ifa.kotlinchat.common.message.Message
 import fr.ifa.kotlinchat.common.message.MessageFactory
@@ -131,7 +132,7 @@ class MainViewController : Controller()
         } else if (isLogged.value) { return }
 
         history.clear()
-        clientSocket = KotlinChatSocket(Socket("127.0.0.1", 4242), receivedMessageQueue)
+        clientSocket = KotlinChatSocket(Socket("127.0.0.1", AppParameters.portNumber), receivedMessageQueue)
         isLogged.set(true)
 
         val message = MessageFactory.createLoginMessage(userName.value)
