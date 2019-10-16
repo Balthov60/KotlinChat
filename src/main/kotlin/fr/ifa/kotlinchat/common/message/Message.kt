@@ -7,7 +7,8 @@ data class Message(
     val identifier: MessageIdentifier,
     val content: List<String>
 ) {
-    override fun toString() = "$identifier|${content.joinToString("|")}\n"
+    fun toSendString() = "$identifier|${content.joinToString("|")}\n"
+    override fun toString() = "$identifier|${content.joinToString("|")}"
 
     fun getUsername() : String {
         return content[1]

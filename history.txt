@@ -1,25 +1,3 @@
-SEND|15.10 à 08:21|server|michel connecté.
-
-SEND|15.10 à 08:21|michel|Salut !
-
-SEND|15.10 à 08:22|server|Maurice connecté.
-
-SEND|15.10 à 08:22|server|Maurice connecté.
-
-SEND|15.10 à 08:22|Maurice|Hey !
-
-SEND|15.10 à 08:22|Maurice|Hey !
-
-SEND|15.10 à 08:22|michel|Ah ! Maurice, tu es la !
-
-SEND|15.10 à 08:22|michel|Ah ! Maurice, tu es la !
-
-SEND|15.10 à 08:22|Maurice|Non connard
-
-SEND|15.10 à 08:22|Maurice|Non connard
-
-SEND|15.10 à 08:22|server|Maurice déconnecté.
-
-
-SEND|15.10 à 08:22|server|michel déconnecté.
-
+SEND|16.10 à 15:28|test|SLT
+SEND|16.10 à 15:28|test|SLT
+SEND|16.10 à 15:28|test|SLT

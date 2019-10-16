@@ -47,7 +47,7 @@ class ServerMessageHandler(
                             sendMulticastMessage(newMessage)
                         }
                         MessageIdentifier.SEND -> {
-                            println("Append to History : $message")
+                            println("Append to History : $message test")
                             historyFile.appendText(message.toString())
                         }
                         MessageIdentifier.LOGOUT -> {
@@ -73,7 +73,7 @@ class ServerMessageHandler(
         if (clientSockets.size != 0)
             clientSockets[0].sendMulticastMessage(message)
         else
-            historyFile.appendText(message.toString())
+            historyFile.appendText(message.toSendString())
     }
 
     private fun sendMessageTo(toSocket: Socket, message: Message) {

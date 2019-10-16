@@ -87,7 +87,7 @@ class KotlinChatSocket(
 
     fun sendMessage(message: Message)
     {
-        outputStream.write(message.toString())
+        outputStream.write(message.toSendString())
         outputStream.flush()
 
         print("Message sent : $message")
@@ -95,7 +95,7 @@ class KotlinChatSocket(
 
     fun sendMulticastMessage(message: Message)
     {
-        val packet = DatagramPacket(message.toString().toByteArray(), message.toString().toByteArray().size, GROUP_ADDRESS, GROUP_PORT)
+        val packet = DatagramPacket(message.toSendString().toByteArray(), message.toSendString().toByteArray().size, GROUP_ADDRESS, GROUP_PORT)
 
         multicastSocket.send(packet)
 
